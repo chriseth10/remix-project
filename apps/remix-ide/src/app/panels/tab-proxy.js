@@ -75,6 +75,18 @@ export default class TabProxy extends Plugin {
       }
     })
 
+    this.on('editor', 'contentChanged', async (currentFile) => {
+      const manuallySave = await this.call('config', 'getAppParameter', 'manual-file-saving')
+      const workspace = this.fileManager.currentWorkspace()
+      this.tabsApi.fileIsModifying(workspace + '/' + currentFile, manuallySave)
+    })
+
+    this.on('fileManager', 'fileSaved', async (currentFile) => {
+      const manuallySave = await this.call('config', 'getAppParameter', 'manual-file-saving')
+      const workspace = this.fileManager.currentWorkspace()
+      this.tabsApi.fileIsSaved(workspace + '/' + currentFile, manuallySave)
+    })
+
     this.on('fileManager', 'currentFileChanged', (file) => {
       const workspace = this.fileManager.currentWorkspace()
 
@@ -258,6 +270,7 @@ export default class TabProxy extends Plugin {
    * @returns
    */
   addTab (name, title, switchTo, close, icon, description = '', show = true) {
+    console.log('Adding tab', name, title)
     if (this._handlers[name]) return this.renderComponent()
 
     if ((name.endsWith('.vy') && icon === undefined) || title.includes('Vyper')) {

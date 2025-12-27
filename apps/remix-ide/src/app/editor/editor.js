@@ -214,6 +214,9 @@ export default class Editor extends Plugin {
         await this._onChange(this.currentFile)
       }
     })
+    this.on('fileManager', 'fileClosed', (file) => {
+      this.discard(file)
+    })
     try {
       this.currentThemeType = (await this.call('theme', 'currentTheme')).quality
     } catch (e) {} // eslint-disable-line no-empty
@@ -387,8 +390,10 @@ export default class Editor extends Plugin {
       window.clearTimeout(this.saveTimeout)
     }
 
+    const manuallySave = await this.call('config', 'getAppParameter', 'manual-file-saving')
     this.saveTimeout = window.setTimeout(() => {
       this.triggerEvent('contentChanged', [currentFile, input])
+      if (manuallySave) return
       this.triggerEvent('requiringToSaveCurrentfile', [currentFile])
     }, 500)
   }
@@ -487,7 +492,6 @@ export default class Editor extends Plugin {
    */
   async _createSession (path, content, mode, readOnly) {
     if (!this.activated) return
-
     this.emit('addModel', content, mode, path, readOnly || this.readOnlySessions[path])
     return {
       path,

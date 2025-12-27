@@ -29,7 +29,7 @@ const profile = {
     'readFile', 'copyFile', 'copyDir', 'rename', 'mkdir', 'readdir', 'dirList', 'fileList', 'remove', 'getCurrentFile', 'getFile',
     'getFolder', 'setFile', 'switchFile', 'refresh', 'getProviderOf', 'getProviderByName', 'getPathFromUrl', 'getUrlFromPath',
     'saveCurrentFile', 'setBatchFiles', 'isGitRepo', 'isFile', 'isDirectory', 'hasGitSubmodule', 'copyFolderToJson', 'diff',
-    'hasGitSubmodules', 'getOpenedFiles', 'download'
+    'hasGitSubmodules', 'getOpenedFiles', 'download', 'saveFile', 'currentWorkspace'
   ],
   kind: 'file-system'
 }
@@ -149,6 +149,11 @@ export default class FileManager extends Plugin {
     } catch (e) {
       throw new Error(e)
     }
+  }
+
+  async saveFile(path) {
+    const content = await this.call('editor', 'getText', path)
+    await this.setFileContent(path, content)
   }
 
   /*
@@ -702,12 +707,6 @@ export default class FileManager extends Plugin {
     }
   }
 
-  async unselectCurrentFile() {
-    await this.saveCurrentFile()
-    this._deps.config.set('currentFile', '')
-    this.emit('noFileSelected')
-  }
-
   async diff(change: commitChange) {
     await this.saveCurrentFile()
     this._deps.config.set('currentFile', '')
@@ -853,6 +852,8 @@ export default class FileManager extends Plugin {
   }
 
   async saveCurrentFile() {
+    const manualSaving = await this.call('config', 'getAppParameter', 'manual-file-saving')
+    if (manualSaving) return
     const currentFile = this._deps.config.get('currentFile')
     if (currentFile && this.editor.current()) {
       const input = this.editor.get(currentFile)
