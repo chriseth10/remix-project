@@ -206,10 +206,10 @@ export const TabsUI = (props: TabsUIProps) => {
                     props.onClose(index)
                   }
                 }
-              props.plugin.call('notification', 'modal', modal)
+                props.plugin.call('notification', 'modal', modal)
               } else {
                 props.onClose(index)
-              }              
+              }
             }}
           >
             <i className={`text-dark fas ${showClose ? 'fa-times' : 'fa-circle fa-xs'}`}></i>
@@ -242,14 +242,14 @@ export const TabsUI = (props: TabsUIProps) => {
     const currentPath = props.tabs[tabsState.selectedIndex]?.name
 
     if (currentPath && currentPath.endsWith(filePath)) {
-        setCompileState('idle')
+      setCompileState('idle')
     }
     if (manuallySave) {
       dispatch({ type: 'ADD_MODIFIED_FILE', payload: filePath })
     }
   }
 
-   const fileIsSaved = (filePath: string, manuallySave: boolean) => {
+  const fileIsSaved = (filePath: string, manuallySave: boolean) => {
     if (manuallySave) {
       dispatch({ type: 'REMOVE_MODIFIED_FILE', payload: filePath })
     }
