@@ -552,7 +552,6 @@ export const TabsUI = (props: TabsUIProps) => {
         return
       }
 
-      await props.plugin.call('fileManager', 'saveCurrentFile')
       try {
         await props.plugin.call('manager', 'activatePlugin', compilerName)
       } catch (e: any) {

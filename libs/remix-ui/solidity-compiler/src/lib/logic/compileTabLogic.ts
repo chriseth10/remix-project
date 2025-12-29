@@ -197,7 +197,6 @@ export class CompileTabLogic {
   async runCompiler (externalCompType: string, path?: string) {
     // externalCompType: 'remix' | 'hardhat' | 'truffle' | 'foundry'
     try {
-      this.api.saveCurrentFile()
       if (this.api.getFileManagerMode() === 'localhost' || this.api.isDesktop()) {
         if (externalCompType === 'hardhat') {
           if (window._matomoManagerInstance) {

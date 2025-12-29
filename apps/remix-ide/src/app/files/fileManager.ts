@@ -709,7 +709,6 @@ export default class FileManager extends Plugin {
   }
 
   async diff(change: commitChange) {
-    await this.saveCurrentFile()
     this._deps.config.set('currentFile', '')
     // TODO: Only keep `this.emit` (issue#2210)
     this.emit('noFileSelected')
@@ -746,7 +745,6 @@ export default class FileManager extends Plugin {
       file = this.normalize(file)
       const resolved = this.getPathFromUrl(file)
       file = resolved.file
-      await this.saveCurrentFile()
       // we always open the file in the editor, even if it's the same as the current one if the editor is in diff mode
       if (this.currentFile() === file && !this.editor.isDiff) return
 
