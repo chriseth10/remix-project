@@ -761,6 +761,7 @@ export default class FileManager extends Plugin {
       } catch (e) {
         console.log('unable to handle TypeScript dependencies of', file)
       }
+      await new Promise((resolve) => setTimeout(resolve, 100)) // give some time to the editor to process the previous command
       if (provider.isReadOnly(file)) {
         await this.editor.openReadOnly(file, content)
       } else {
@@ -844,7 +845,7 @@ export default class FileManager extends Plugin {
     return this.appManager.isActive('remixd')
   }
 
-  async saveFile(path) {
+  async saveFile(path?) {
     const currentFile = path || this._deps.config.get('currentFile')
     if (currentFile && this.editor.current()) {
       const input = this.editor.get(currentFile)
