@@ -149,13 +149,7 @@ export default class FileManager extends Plugin {
     } catch (e) {
       throw new Error(e)
     }
-  }
-
-  async saveFile(path) {
-    const content = await this.call('editor', 'getText', path)
-    await this.setFileContent(path, content)
-    this.emit('fileSaved', path)
-  }
+  }  
 
   /*
   * refresh the file explorer
@@ -850,10 +844,8 @@ export default class FileManager extends Plugin {
     return this.appManager.isActive('remixd')
   }
 
-  async saveCurrentFile() {
-    const manualSaving = await this.call('config', 'getAppParameter', 'manual-file-saving')
-    if (manualSaving) return
-    const currentFile = this._deps.config.get('currentFile')
+  async saveFile(path) {
+    const currentFile = path || this._deps.config.get('currentFile')
     if (currentFile && this.editor.current()) {
       const input = this.editor.get(currentFile)
       if ((input !== null) && (input !== undefined)) {
