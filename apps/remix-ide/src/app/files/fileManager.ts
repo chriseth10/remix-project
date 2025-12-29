@@ -149,7 +149,7 @@ export default class FileManager extends Plugin {
     } catch (e) {
       throw new Error(e)
     }
-  }  
+  }
 
   /*
   * refresh the file explorer
