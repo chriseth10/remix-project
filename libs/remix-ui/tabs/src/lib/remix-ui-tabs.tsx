@@ -212,7 +212,7 @@ export const TabsUI = (props: TabsUIProps) => {
               }              
             }}
           >
-            <i className={`text-dark fas ${showClose ? 'fa-times' : 'fa-circle'}`}></i>
+            <i className={`text-dark fas ${showClose ? 'fa-times' : 'fa-circle fa-xs'}`}></i>
           </span>
         </div>
       </CustomTooltip>
