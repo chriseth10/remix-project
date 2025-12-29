@@ -236,6 +236,13 @@ export const CompilerApiMixin = (Base) => class extends Base {
       if (this.onContentChanged) this.onContentChanged()
     })
 
+    this.on('fileManager', 'fileSaved', (path) => {
+      if (path === this.currentFile) {
+        this.statusChanged({ key: 'edited', title: 'The content has changed, needs recompilation', type: 'info' })
+        if (this.onContentChanged) this.onContentChanged()
+      }
+    })
+
     this.data.eventHandlers.onLoadingCompiler = (url) => {
       this.data.loading = true
       this.data.loadingUrl = url

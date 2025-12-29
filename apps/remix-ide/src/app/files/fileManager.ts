@@ -154,6 +154,7 @@ export default class FileManager extends Plugin {
   async saveFile(path) {
     const content = await this.call('editor', 'getText', path)
     await this.setFileContent(path, content)
+    this.emit('fileSaved', path)
   }
 
   /*
