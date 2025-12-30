@@ -196,6 +196,7 @@ export const TabsUI = (props: TabsUIProps) => {
                   okLabel: 'Save',
                   cancelLabel: 'Don\'t Save',
                   cancelFn: () => {
+                    fileStateIsClean(tab.name, true)
                     props.onClose(index)
                   },
                   okFn: async () => {
@@ -249,7 +250,7 @@ export const TabsUI = (props: TabsUIProps) => {
     }
   }
 
-  const fileIsSaved = (filePath: string, manuallySave: boolean) => {
+  const fileStateIsClean = (filePath: string, manuallySave: boolean) => {
     if (manuallySave) {
       dispatch({ type: 'REMOVE_MODIFIED_FILE', payload: filePath })
     }
@@ -270,7 +271,7 @@ export const TabsUI = (props: TabsUIProps) => {
       active,
       setFileDecorations,
       fileIsModifying,
-      fileIsSaved
+      fileStateIsClean
     })
     return () => {
       if (tabsElement.current) tabsElement.current.removeEventListener('wheel', transformScroll)

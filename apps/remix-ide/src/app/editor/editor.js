@@ -89,11 +89,14 @@ export default class Editor extends Plugin {
     this.typesLoadingCount = 0
     this.shimDisposers = new Map()
 
+    /*
+    Test:
     setInterval(() => {
       Object.entries(this.sessions).map(([path, session]) => {
         console.log(path, session.getValue())
       })
     }, 2000)
+    */
   }
 
 
@@ -398,7 +401,7 @@ export default class Editor extends Plugin {
     }
 
     const manuallySave = await this.call('config', 'getAppParameter', 'manual-file-saving')
-    this.saveTimeout = window.setTimeout(() => {      
+    this.saveTimeout = window.setTimeout(() => {
       this.triggerEvent('contentChanged', [currentFile, input])
       if (manuallySave) return
       this.call('fileManager', 'saveFile', currentFile)
@@ -429,9 +432,11 @@ export default class Editor extends Plugin {
   async handleTypeScriptDependenciesOf(path, content, readFile, exists) {
     const isJsOrTs = path.endsWith('.js') || path.endsWith('.jsx') || path.endsWith('.ts') || path.endsWith('.tsx')
     
+    /*
     if (isJsOrTs) {
       this._onChange(path)
     }
+    */
 
     const isTsFile = path.endsWith('.ts') || path.endsWith('.tsx')
     const isJsFile = path.endsWith('.js') || path.endsWith('.jsx')
