@@ -6,6 +6,7 @@ import * as packageJson from '../../../../../package.json'
 import { PluginViewWrapper } from '@remix-ui/helper'
 
 import { startTypeLoadingProcess } from './type-fetcher'
+import { setIn } from 'formik'
 
 const EventManager = require('../../lib/events')
 
@@ -87,6 +88,12 @@ export default class Editor extends Plugin {
 
     this.typesLoadingCount = 0
     this.shimDisposers = new Map()
+
+    setInterval(() => {
+      Object.entries(this.sessions).map(([path, session]) => {
+        console.log(path, session.getValue())
+      })
+    }, 2000)
   }
 
 
@@ -571,8 +578,6 @@ export default class Editor extends Plugin {
       this.readOnlySessions[path] = false
       const session = await this._createSession(path, content, this._getMode(path))
       this.sessions[path] = session
-    } else if (this.sessions[path].getValue() !== content) {
-      this.sessions[path].setValue(content)
     }
     this._switchSession(path)
   }
@@ -656,6 +661,7 @@ export default class Editor extends Plugin {
    * @param {string} path
    */
   discard (path) {
+    console.trace()
     if (this.sessions[path]) {
       this.sessions[path].dispose()
       delete this.sessions[path]

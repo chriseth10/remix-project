@@ -270,7 +270,6 @@ export default class TabProxy extends Plugin {
    * @returns
    */
   addTab (name, title, switchTo, close, icon, description = '', show = true) {
-    console.log('Adding tab', name, title)
     if (this._handlers[name]) return this.renderComponent()
 
     if ((name.endsWith('.vy') && icon === undefined) || title.includes('Vyper')) {
