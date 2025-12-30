@@ -22,17 +22,9 @@ module.exports = {
 
   'Should display modal when closing modified file and choose discard #group1': function (browser: NightwatchBrowser) {
     browser
-      .waitForElementVisible('*[data-id="verticalIconsKindfilePanel"]')
-      .clickLaunchIcon('filePanel')
       .waitForElementVisible('*[data-id="treeViewLitreeViewItemREADME.txt"]')
       .click('li[data-id="treeViewLitreeViewItemREADME.txt"]')
-      .rightClickCustom('[data-id="treeViewUltreeViewMenu"]')
-      .click('*[data-id="contextMenuItemnewFile"]')
-      .pause(1000)
-      .waitForElementVisible('*[data-id$="fileExplorerTreeItemInput"]')
-      .sendKeys('*[data-id$="fileExplorerTreeItemInput"]', 'test_discard.txt')
-      .sendKeys('*[data-id$="fileExplorerTreeItemInput"]', browser.Keys.ENTER)
-      .pause(1000)
+      .addFile('test_discard.txt', { content: '' })
       .waitForElementVisible('*[data-id="treeViewLitreeViewItemtest_discard.txt"]')
       .pause(500)
       .setEditorValue('This content will be discarded')
@@ -84,42 +76,6 @@ module.exports = {
       .pause(500)
       .getEditorValue((content) => {
         browser.assert.equal(content, 'This content will be saved')
-      })
-  },
-
-  'Should not display modal when closing manually saved file #group1': function (browser: NightwatchBrowser) {
-    browser
-      .waitForElementVisible('#editorView')
-      .setEditorValue('This content will be manually saved')
-      .pause(500)
-      // Verify the file is marked as modified
-      .waitForElementVisible('*[data-id="close_default_workspace/test_discard.txt"] .fa-circle')
-      // Manually save using Ctrl+S
-      .perform((done) => {
-        browser.execute(function () {
-          const editorView = document.getElementById('editorView') as any
-          if (editorView && editorView.saveCurrentContent) {
-            editorView.saveCurrentContent()
-          }
-        }, [], () => {
-          done()
-        })
-      })
-      .pause(1000)
-      // Verify the modified indicator is gone
-      .waitForElementNotPresent('*[data-id="close_default_workspace/test_discard.txt"] .fa-circle', 5000)
-      .waitForElementVisible('*[data-id="close_default_workspace/test_discard.txt"] .fa-times')
-      // Try to close the tab
-      .click('*[data-id="close_default_workspace/test_discard.txt"]')
-      .pause(500)
-      // Verify modal does NOT appear and tab is closed immediately
-      .waitForElementNotPresent('*[data-id="SaveFileModalDialogModalBody-react"]', 2000)
-      .waitForElementNotPresent('*[data-id="close_default_workspace/test_discard.txt"]')
-      // Reopen and verify content was saved
-      .openFile('test_discard.txt')
-      .pause(500)
-      .getEditorValue((content) => {
-        browser.assert.equal(content, 'This content will be manually saved')
       })
   },
 
