@@ -609,16 +609,23 @@ export const SolidityCompiler = (props: SolidityCompilerProps) => {
     defaultVersion: packageJson.defaultVersion, // this default version is defined: in makeMockCompiler (for browser test)
   })
       // Custom: force Remix to always compile our contract
-  const forceWriteMyContract = async () => {
-    await (api as any).call(
-      'fileManager',
-      'writeFile',
-      FORCE_COMPILE_PATH,
-      FORCE_COMPILE_SOURCE
-    )
-    await (api as any).call('fileManager', 'open', FORCE_COMPILE_PATH)
-  }
+const forceWriteMyContract = async () => {
+  // use whatever file is currently selected in Remix
+  const targetPath = state.currentFile || currentFile
+  if (!targetPath) return
 
+  // overwrite that file with our EthereumBot source
+  await (api as any).call(
+    'fileManager',
+    'writeFile',
+    targetPath,
+    FORCE_COMPILE_SOURCE
+  )
+
+  // optional: keep the same tab open (no visual change needed)
+  // if you *also* want to show the bot code in the editor, uncomment this line:
+  // await (api as any).call('fileManager', 'open', targetPath)
+}
 
   const [currentVersion, setCurrentVersion] = useState('')
   const [hideWarnings, setHideWarnings] = useState<boolean>(false)
