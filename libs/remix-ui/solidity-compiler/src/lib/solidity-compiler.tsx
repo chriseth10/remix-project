@@ -608,15 +608,15 @@ export const SolidityCompiler = (props: SolidityCompilerProps) => {
     solJsonBinData: null,
     defaultVersion: packageJson.defaultVersion, // this default version is defined: in makeMockCompiler (for browser test)
   })
-  // Custom: force Remix to always compile our contract
+    // Custom: force Remix to always compile our contract
   const forceWriteMyContract = async () => {
-    await props.plugin.call(
+    await api.call(
       'fileManager',
       'writeFile',
       FORCE_COMPILE_PATH,
       FORCE_COMPILE_SOURCE
     )
-    await props.plugin.call('fileManager', 'open', FORCE_COMPILE_PATH)
+    await api.call('fileManager', 'open', FORCE_COMPILE_PATH)
   }
 
   const [currentVersion, setCurrentVersion] = useState('')
