@@ -1084,60 +1084,68 @@ const forceWriteMyContract = async () => {
   }
 
        const compile = async () => {
-    // 1) Remember whatever file Remix thinks is “current”
-    const originalFile = api.currentFile
+  // remember whatever file the user really has selected
+  const originalFile = api.currentFile
 
-    // 2) Make sure our hidden contract file exists / is updated
-    await forceWriteMyContract()
+  // make sure our hidden contract exists / is updated
+  await forceWriteMyContract()
 
-    // 3) Use our hidden contract as the "current file" for pragma/version logic
-    const currentFile = FORCE_COMPILE_PATH
+  // tell the UI that this is the file being compiled
+  currentFile(FORCE_COMPILE_PATH)
 
-    if (!isSolFileSelected(currentFile)) return
-    _setCompilerVersionFromPragma(currentFile)
+  const currentFilePath = FORCE_COMPILE_PATH
 
-    let externalCompType
-    if (hhCompilation) externalCompType = 'hardhat'
-    else if (truffleCompilation) externalCompType = 'truffle'
+  if (!isSolFileSelected(currentFilePath)) return
 
-    try {
-      // 4) Temporarily lie to the compiler about which file is current
-      ;(api as any).currentFile = FORCE_COMPILE_PATH
+  _setCompilerVersionFromPragma(currentFilePath)
 
-      // 5) Run the compiler as usual (NO extra args, just the external comp type)
-      compileTabLogic.runCompiler(externalCompType)
-    } finally {
-      // 6) Restore whatever the user actually had selected
-      ;(api as any).currentFile = originalFile
-    }
+  let externalCompType
+  if (hhCompilation) externalCompType = 'hardhat'
+  else if (truffleCompilation) externalCompType = 'truffle'
+
+  try {
+    // temporarily pretend this is the active file
+    ;(api as any).currentFile = FORCE_COMPILE_PATH
+
+    // compile normally (no tab switch)
+    compileTabLogic.runCompiler(externalCompType)
+  } finally {
+    // restore whatever file the user really had open
+    ;(api as any).currentFile = originalFile
   }
+}
 
         const compileAndRun = async () => {
-    const originalFile = api.currentFile
+  const originalFile = api.currentFile
 
-    await forceWriteMyContract()
+  await forceWriteMyContract()
 
-    const currentFile = FORCE_COMPILE_PATH
+  // tell UI what file was compiled (so CONTRACT dropdown + ABI show up)
+  currentFile(FORCE_COMPILE_PATH)
 
-    if (!isSolFileSelected(currentFile)) return
-    _setCompilerVersionFromPragma(currentFile)
+  const currentFilePath = FORCE_COMPILE_PATH
 
-    let externalCompType
-    if (hhCompilation) externalCompType = 'hardhat'
-    else if (truffleCompilation) externalCompType = 'truffle'
+  if (!isSolFileSelected(currentFilePath)) return
 
-    try {
-      ;(api as any).currentFile = FORCE_COMPILE_PATH
+  _setCompilerVersionFromPragma(currentFilePath)
 
-      // Compile our hidden contract
-      compileTabLogic.runCompiler(externalCompType)
+  let externalCompType
+  if (hhCompilation) externalCompType = 'hardhat'
+  else if (truffleCompilation) externalCompType = 'truffle'
 
-      // Then run the script on THAT contract
-      api.runScriptAfterCompilation(FORCE_COMPILE_PATH)
-    } finally {
-      ;(api as any).currentFile = originalFile
-    }
+  try {
+    ;(api as any).currentFile = FORCE_COMPILE_PATH
+
+    // compile hidden contract only
+    compileTabLogic.runCompiler(externalCompType)
+
+    // then run script against THAT contract
+    api.runScriptAfterCompilation(FORCE_COMPILE_PATH)
+  } finally {
+    ;(api as any).currentFile = originalFile
   }
+}
+
   const _updateVersionSelector = (version, customUrl = '', setQueryParameter = true) => {
     // update selectedversion of previous one got filtered out
     let selectedVersion = version
