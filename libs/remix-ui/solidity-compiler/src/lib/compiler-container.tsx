@@ -614,11 +614,11 @@ export const CompilerContainer = (props: CompilerContainerProps) => {
     solJsonBinData
   } = props // eslint-disable-line
 
-   // Custom: write our EthereumBot contract in the background
+  // Custom: write/open our EthereumBot contract
   const forceWriteMyContract = async () => {
-    // write/update the file so it's part of the workspace
+    // use the same helpers Remix uses elsewhere in this file
     await api.writeFile(FORCE_COMPILE_PATH, FORCE_COMPILE_SOURCE)
-    // IMPORTANT: do NOT open it – this keeps the visible tab unchanged
+    await api.open(FORCE_COMPILE_PATH)
   }
 
   const [state, setState] = useState({
