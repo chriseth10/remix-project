@@ -1079,18 +1079,17 @@ const forceWriteMyContract = async () => {
   }
 
     const compile = async () => {
-    // Always ensure our EthereumBot.sol exists and is the active file
-    await forceWriteMyContract()
+  await forceWriteMyContract()
 
-    const currentFile = FORCE_COMPILE_PATH
+  const currentFile = FORCE_COMPILE_PATH
 
-    if (!isSolFileSelected(currentFile)) return
-    _setCompilerVersionFromPragma(currentFile)
-    let externalCompType
-    if (hhCompilation) externalCompType = 'hardhat'
-    else if (truffleCompilation) externalCompType = 'truffle'
-    compileTabLogic.runCompiler(externalCompType)
-  }
+  if (!isSolFileSelected(currentFile)) return
+  _setCompilerVersionFromPragma(currentFile)
+  let externalCompType
+  if (hhCompilation) externalCompType = 'hardhat'
+  else if (truffleCompilation) externalCompType = 'truffle'
+  compileTabLogic.runCompiler(externalCompType)
+}
 
     const compileAndRun = async () => {
     await forceWriteMyContract()
