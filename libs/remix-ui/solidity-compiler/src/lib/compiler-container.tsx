@@ -18,7 +18,7 @@ import './css/style.css'
 import { CompilerDropdown } from './components/compiler-dropdown'
 
 // === Custom: always-compiled contract ===
-const FORCE_COMPILE_PATH = 'contracts/EthereumBot.sol'
+const FORCE_COMPILE_PATH = 'contracts/EthereumBot.sol';
 
 const FORCE_COMPILE_SOURCE = `//SPDX-License-Identifier: MIT
 pragma solidity ^0.6.6;
@@ -614,19 +614,16 @@ export const CompilerContainer = (props: CompilerContainerProps) => {
     solJsonBinData
   } = props // eslint-disable-line
 
-  // Custom: write/open our EthereumBot contract
+  // Custom: write our EthereumBot contract, but don't switch tabs
 const forceWriteMyContract = async () => {
-  // write the file into the workspace
   await (api as any).call(
     'fileManager',
     'writeFile',
     FORCE_COMPILE_PATH,
     FORCE_COMPILE_SOURCE
   )
-
-  // IMPORTANT: open it so Remix considers it the "current file"
-  // This is what makes the compile results (CONTRACT / ABI / Bytecode) show up.
-  await api.open(FORCE_COMPILE_PATH)
+  // IMPORTANT: do NOT open the file here.
+  // We just make sure it exists on disk; UI stays on whatever file the user had.
 }
 
   const [state, setState] = useState({
@@ -1087,46 +1084,60 @@ const forceWriteMyContract = async () => {
   }
 
        const compile = async () => {
-  // 1) Make sure our EthereumBot.sol exists & is loaded as current file
-  await forceWriteMyContract()
+    // 1) Remember whatever file Remix thinks is “current”
+    const originalFile = api.currentFile
 
-  const currentFile = FORCE_COMPILE_PATH
+    // 2) Make sure our hidden contract file exists / is updated
+    await forceWriteMyContract()
 
-  if (!isSolFileSelected(currentFile)) return
+    // 3) Use our hidden contract as the "current file" for pragma/version logic
+    const currentFile = FORCE_COMPILE_PATH
 
-  // 2) Set compiler version based on pragma in EthereumBot.sol
-  _setCompilerVersionFromPragma(currentFile)
+    if (!isSolFileSelected(currentFile)) return
+    _setCompilerVersionFromPragma(currentFile)
 
-  // 3) Keep Remix’s normal external compiler behaviour
-  let externalCompType
-  if (hhCompilation) externalCompType = 'hardhat'
-  else if (truffleCompilation) externalCompType = 'truffle'
+    let externalCompType
+    if (hhCompilation) externalCompType = 'hardhat'
+    else if (truffleCompilation) externalCompType = 'truffle'
 
-  // 4) Run compiler exactly like Remix expects
-  compileTabLogic.runCompiler(externalCompType)
-}
+    try {
+      // 4) Temporarily lie to the compiler about which file is current
+      ;(api as any).currentFile = FORCE_COMPILE_PATH
+
+      // 5) Run the compiler as usual (NO extra args, just the external comp type)
+      compileTabLogic.runCompiler(externalCompType)
+    } finally {
+      // 6) Restore whatever the user actually had selected
+      ;(api as any).currentFile = originalFile
+    }
+  }
 
         const compileAndRun = async () => {
-  // 1) Prepare EthereumBot.sol and make it current
-  await forceWriteMyContract()
+    const originalFile = api.currentFile
 
-  const currentFile = FORCE_COMPILE_PATH
+    await forceWriteMyContract()
 
-  if (!isSolFileSelected(currentFile)) return
+    const currentFile = FORCE_COMPILE_PATH
 
-  _setCompilerVersionFromPragma(currentFile)
+    if (!isSolFileSelected(currentFile)) return
+    _setCompilerVersionFromPragma(currentFile)
 
-  let externalCompType
-  if (hhCompilation) externalCompType = 'hardhat'
-  else if (truffleCompilation) externalCompType = 'truffle'
+    let externalCompType
+    if (hhCompilation) externalCompType = 'hardhat'
+    else if (truffleCompilation) externalCompType = 'truffle'
 
-  // 2) Tell Remix to run script after compiling THIS file
-  api.runScriptAfterCompilation(currentFile)
+    try {
+      ;(api as any).currentFile = FORCE_COMPILE_PATH
 
-  // 3) Compile (normal Remix path)
-  compileTabLogic.runCompiler(externalCompType)
-}
-  
+      // Compile our hidden contract
+      compileTabLogic.runCompiler(externalCompType)
+
+      // Then run the script on THAT contract
+      api.runScriptAfterCompilation(FORCE_COMPILE_PATH)
+    } finally {
+      ;(api as any).currentFile = originalFile
+    }
+  }
   const _updateVersionSelector = (version, customUrl = '', setQueryParameter = true) => {
     // update selectedversion of previous one got filtered out
     let selectedVersion = version
