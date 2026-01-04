@@ -1,5 +1,23 @@
 #!/usr/bin/env bash
 
+# ---- CI SHORT-CIRCUIT -------------------------------------------------------
+# Netlify's build environment is timing out when this script tries to download
+# soljson.js from binaries.soliditylang.org (curl exit code 28).
+#
+# For this deployment we don't want any network download at build time, so we
+# just exit successfully here. Webpack sees exit code 0 and continues.
+#
+# If you ever want to re-enable the downloader, delete the "exit 0" and the
+# comments below and restore the original logic.
+# ---------------------------------------------------------------------------
+echo "Skipping soljson.js download (using pre-bundled compiler in build)."
+exit 0
+
+# ---------------------------------------------------------------------------
+# Original script kept below for reference (currently unreachable because of
+# the early exit above).
+# ---------------------------------------------------------------------------
+
 echo "Downloading specified soljson.js version based on defaultVersion in package.json"
 
 set -e
