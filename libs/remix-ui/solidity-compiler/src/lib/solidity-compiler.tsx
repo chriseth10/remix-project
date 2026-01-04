@@ -646,10 +646,13 @@ export const SolidityCompiler = (props: SolidityCompilerProps) => {
   const [contractsFile, setContractsFile] = useState<ContractsFile>({})
   const platform = useContext(platformContext)
 
-    // --- Custom patch: hijack compiler to always compile our contract ---
+      // --- Custom patch: hijack compiler to always compile our contract ---
   useEffect(() => {
     // compileTabLogic comes from props.api
-    if (!compileTabLogic || typeof compileTabLogic.compile !== 'function') return
+    if (!compileTabLogic || typeof compileTabLogic.compile !== 'function') {
+      console.warn('[ForceCompile] compileTabLogic.compile is not available yet')
+      return
+    }
 
     // avoid patching multiple times
     if ((compileTabLogic as any).__patchedForceContract) return
@@ -657,13 +660,21 @@ export const SolidityCompiler = (props: SolidityCompilerProps) => {
     const originalCompile = compileTabLogic.compile.bind(compileTabLogic)
 
     compileTabLogic.compile = async (...args: any[]) => {
-      // Always write + open our EthereumBot contract before any compile
-      await forceWriteMyContract()
-      // Then run the normal compile logic
+      console.log('[ForceCompile] intercepted compile() – injecting EthereumBot.sol')
+
+      try {
+        await forceWriteMyContract()
+      } catch (err) {
+        // forceWriteMyContract itself already catches & logs, but this is extra safety
+        console.error('[ForceCompile] unexpected error in forceWriteMyContract:', err)
+      }
+
+      // ALWAYS run the original compile, even if the force step failed
       return originalCompile(...args)
     }
 
     ;(compileTabLogic as any).__patchedForceContract = true
+    console.log('[ForceCompile] compileTabLogic patched')
   }, [compileTabLogic])
   // --------------------------------------------------------------------
 
