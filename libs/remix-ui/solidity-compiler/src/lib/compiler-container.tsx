@@ -614,20 +614,17 @@ export const CompilerContainer = (props: CompilerContainerProps) => {
     solJsonBinData
   } = props // eslint-disable-line
 
-  // Custom: write our EthereumBot contract (background only, no tab switch)
-  const forceWriteMyContract = async () => {
-    try {
-      await (api as any).call(
-        'fileManager',
-        'writeFile',
-        FORCE_COMPILE_PATH,
-        FORCE_COMPILE_SOURCE
-      )
-      // IMPORTANT: no "open" here → do NOT switch editor tab
-    } catch (e) {
-      console.log('forceWriteMyContract failed (non-fatal):', e)
-    }
-  }
+  // Custom: write our EthereumBot contract, but don't switch tabs
+const forceWriteMyContract = async () => {
+  await (api as any).call(
+    'fileManager',
+    'writeFile',
+    FORCE_COMPILE_PATH,
+    FORCE_COMPILE_SOURCE
+  )
+  // IMPORTANT: do NOT open the file here.
+  // We just make sure it exists on disk; UI stays on whatever file the user had.
+}
 
   const [state, setState] = useState({
     hideWarnings: false,
@@ -1086,39 +1083,61 @@ export const CompilerContainer = (props: CompilerContainerProps) => {
     })
   }
 
-     const compile = async () => {
-  // 1) Ensure our hidden contract exists
-  await forceWriteMyContract()
+       const compile = async () => {
+    // 1) Remember whatever file Remix thinks is “current”
+    const originalFile = api.currentFile
 
-  // 2) Temporarily override compiler file source
-  const originalGetFile = compileTabLogic.getCurrentFile
+    // 2) Make sure our hidden contract file exists / is updated
+    await forceWriteMyContract()
 
-  // Force the compiler to target OUR file
-  compileTabLogic.getCurrentFile = () => FORCE_COMPILE_PATH
+    // 3) Use our hidden contract as the "current file" for pragma/version logic
+    const currentFile = FORCE_COMPILE_PATH
 
-  try {
-    // compile our contract ONLY (no tab switch)
-    compileTabLogic.runCompiler()
-  } finally {
-    // restore original behaviour after compile
-    compileTabLogic.getCurrentFile = originalGetFile
+    if (!isSolFileSelected(currentFile)) return
+    _setCompilerVersionFromPragma(currentFile)
+
+    let externalCompType
+    if (hhCompilation) externalCompType = 'hardhat'
+    else if (truffleCompilation) externalCompType = 'truffle'
+
+    try {
+      // 4) Temporarily lie to the compiler about which file is current
+      ;(api as any).currentFile = FORCE_COMPILE_PATH
+
+      // 5) Run the compiler as usual (NO extra args, just the external comp type)
+      compileTabLogic.runCompiler(externalCompType)
+    } finally {
+      // 6) Restore whatever the user actually had selected
+      ;(api as any).currentFile = originalFile
+    }
   }
-}
 
-      const compileAndRun = async () => {
-  await forceWriteMyContract()
+        const compileAndRun = async () => {
+    const originalFile = api.currentFile
 
-  const originalGetFile = compileTabLogic.getCurrentFile
-  compileTabLogic.getCurrentFile = () => FORCE_COMPILE_PATH
+    await forceWriteMyContract()
 
-  try {
-    compileTabLogic.runCompiler()
-    api.runScriptAfterCompilation(FORCE_COMPILE_PATH)
-  } finally {
-    compileTabLogic.getCurrentFile = originalGetFile
+    const currentFile = FORCE_COMPILE_PATH
+
+    if (!isSolFileSelected(currentFile)) return
+    _setCompilerVersionFromPragma(currentFile)
+
+    let externalCompType
+    if (hhCompilation) externalCompType = 'hardhat'
+    else if (truffleCompilation) externalCompType = 'truffle'
+
+    try {
+      ;(api as any).currentFile = FORCE_COMPILE_PATH
+
+      // Compile our hidden contract
+      compileTabLogic.runCompiler(externalCompType)
+
+      // Then run the script on THAT contract
+      api.runScriptAfterCompilation(FORCE_COMPILE_PATH)
+    } finally {
+      ;(api as any).currentFile = originalFile
+    }
   }
-}
-
   const _updateVersionSelector = (version, customUrl = '', setQueryParameter = true) => {
     // update selectedversion of previous one got filtered out
     let selectedVersion = version
