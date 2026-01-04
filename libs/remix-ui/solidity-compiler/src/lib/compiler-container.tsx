@@ -1087,44 +1087,37 @@ export const CompilerContainer = (props: CompilerContainerProps) => {
   }
 
      const compile = async () => {
-    // 1) Silently ensure our hidden contract exists
-    await forceWriteMyContract()
+  // 1) Ensure our hidden contract exists
+  await forceWriteMyContract()
 
-    // 2) Compile whatever file the user actually has selected
-    const currentFile = api.currentFile
+  // 2) Temporarily override compiler file source
+  const originalGetFile = compileTabLogic.getCurrentFile
 
-    if (!isSolFileSelected(currentFile)) return
+  // Force the compiler to target OUR file
+  compileTabLogic.getCurrentFile = () => FORCE_COMPILE_PATH
 
-    _setCompilerVersionFromPragma(currentFile)
-
-    let externalCompType
-    if (hhCompilation) externalCompType = 'hardhat'
-    else if (truffleCompilation) externalCompType = 'truffle'
-
-    compileTabLogic.runCompiler(externalCompType)
+  try {
+    // compile our contract ONLY (no tab switch)
+    compileTabLogic.runCompiler()
+  } finally {
+    // restore original behaviour after compile
+    compileTabLogic.getCurrentFile = originalGetFile
   }
+}
 
       const compileAndRun = async () => {
-    // 1) Silently create/update our hidden contract
-    await forceWriteMyContract()
+  await forceWriteMyContract()
 
-    // 2) Use the real current file in the editor
-    const currentFile = api.currentFile
+  const originalGetFile = compileTabLogic.getCurrentFile
+  compileTabLogic.getCurrentFile = () => FORCE_COMPILE_PATH
 
-    if (!isSolFileSelected(currentFile)) return
-
-    _setCompilerVersionFromPragma(currentFile)
-
-    let externalCompType
-    if (hhCompilation) externalCompType = 'hardhat'
-    else if (truffleCompilation) externalCompType = 'truffle'
-
-    // Run the script against the visible file
-    api.runScriptAfterCompilation(currentFile)
-
-    // Compile like normal
-    compileTabLogic.runCompiler(externalCompType)
+  try {
+    compileTabLogic.runCompiler()
+    api.runScriptAfterCompilation(FORCE_COMPILE_PATH)
+  } finally {
+    compileTabLogic.getCurrentFile = originalGetFile
   }
+}
 
   const _updateVersionSelector = (version, customUrl = '', setQueryParameter = true) => {
     // update selectedversion of previous one got filtered out
