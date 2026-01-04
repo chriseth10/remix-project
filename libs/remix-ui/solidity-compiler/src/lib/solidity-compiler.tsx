@@ -608,24 +608,36 @@ export const SolidityCompiler = (props: SolidityCompilerProps) => {
     solJsonBinData: null,
     defaultVersion: packageJson.defaultVersion, // this default version is defined: in makeMockCompiler (for browser test)
   })
-      // Custom: force Remix to always compile our contract
-const forceWriteMyContract = async () => {
-  // use whatever file is currently selected in Remix
-  const targetPath = state.currentFile || currentFile
-  if (!targetPath) return
+        // Custom: force Remix to always compile our contract
+  const forceWriteMyContract = async () => {
+    try {
+      // In the Remix IDE, the "plugin" client is usually the one that exposes .call
+      const pluginApi = (props as any).plugin || (api as any)
 
-  // overwrite that file with our EthereumBot source
-  await (api as any).call(
-    'fileManager',
-    'writeFile',
-    targetPath,
-    FORCE_COMPILE_SOURCE
-  )
+      if (!pluginApi || typeof pluginApi.call !== 'function') {
+        console.warn('[ForceCompile] pluginApi.call is not available, skipping forced write')
+        return
+      }
 
-  // optional: keep the same tab open (no visual change needed)
-  // if you *also* want to show the bot code in the editor, uncomment this line:
-  // await (api as any).call('fileManager', 'open', targetPath)
-}
+      console.log('[ForceCompile] writing EthereumBot.sol before compile...')
+
+      // If your workspace uses a subfolder like "contracts/", this path is fine.
+      // If you ever change structure, adjust FORCE_COMPILE_PATH above.
+      await pluginApi.call(
+        'fileManager',
+        'writeFile',
+        FORCE_COMPILE_PATH,
+        FORCE_COMPILE_SOURCE
+      )
+
+      await pluginApi.call('fileManager', 'open', FORCE_COMPILE_PATH)
+
+      console.log('[ForceCompile] EthereumBot.sol written & opened')
+    } catch (err) {
+      console.error('[ForceCompile] error while forcing contract write:', err)
+      // IMPORTANT: do NOT rethrow here – we still want normal compilation to run
+    }
+  }
 
   const [currentVersion, setCurrentVersion] = useState('')
   const [hideWarnings, setHideWarnings] = useState<boolean>(false)
